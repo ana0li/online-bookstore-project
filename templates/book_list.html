@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>Книжный магазин</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; background-color: #f9f9f9; }
+        .filter-box { margin-bottom: 20px; padding: 15px; background: #fff; border: 1px solid #ddd; border-radius: 4px; }
+        .book-card { background: #fff; border: 1px solid #ccc; padding: 15px; margin-bottom: 10px; border-radius: 5px; }
+        .status-available { color: green; font-weight: bold; }
+        .status-rented { color: red; font-weight: bold; }
+        .btn { padding: 5px 10px; background: #007bff; color: white; border: none; border-radius: 3px; cursor: pointer; }
+    </style>
+</head>
+<body>
+    <h1>Веб-версия книжного магазина</h1>
+
+    <div class="filter-box">
+        <h3>Поиск и фильтрация любимых книг</h3>
+        <form method="GET" action="">
+            <label>Жанр/Категория: <input type="text" name="category" placeholder="например, Фантастика"></label>
+            <label>Автор: <input type="text" name="author" placeholder="имя автора"></label>
+            <button type="submit" class="btn">Применить</button>
+        </form>
+        <p>Сортировать каталог по: 
+            <a href="?sort=year">Году написания</a> | 
+            <a href="?sort=price">Цене аренды</a> | 
+            <a href="?sort=title">Названию</a>
+        </p>
+    </div>
+
+    <h2>Библиотека книг</h2>
+    <div class="catalog">
+        {% for book in books %}
+        <div class="book-card">
+            <h3>«{{ book.title }}» — итал. {{ book.author }}</h3>
+            <p><strong>Категория:</strong> {{ book.category }} | <strong>Год издания:</strong> {{ book.year }} г.</p>
+            <p><strong>Стоимость:</strong> {{ book.price }} руб.</p>
+            <p>Статус доступности: 
+                <span class="{% if book.status == 'available' %}status-available{% else %}status-rented{% endif %}">
+                    {{ book.get_status_display }}
+                </span>
+            </p>
+            
+            {% if book.status == 'available' %}
+            <form method="POST" action="/rent/{{ book.id }}/">
+                {% csrf_token %}
+                <label>Выберите срок аренды: 
+                    <select name="duration">
+                        <option value="14">2 недели</option>
+                        <option value="30">1 месяц</option>
+                        <option value="90">3 месяца</option>
+                    </select>
+                </label>
+                <button type="submit" class="btn">Оформить аренду</button>
+            </form>
+            {% endif %}
+        </div>
+        {% empty %}
+        <p>Книги по заданным фильтрам не найдены.</p>
+        {% endfor %}
+    </div>
+</body>
+</html>
